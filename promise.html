@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promise</title>
+</head>
+
+<body>
+  <script async>
+    let p1 = new Promise((resolve, reject) => {
+      resolve('success')
+      reject('fail')
+    })
+    let p2 = new Promise((resolve, reject) => {
+      throw ('error')
+    })
+    console.log('p1:', p1);
+    // [[Prototype]]: Promise
+    // [[PromiseState]]: "fulfilled"
+    // [[PromiseResult]]: "success"
+    console.log('p2:', p2);
+    // [[Prototype]]: Promise
+    // [[PromiseState]]: "rejected"
+    // [[PromiseResult]]: "error"
+
+    // 通过上面代码我们得出Promise四个特点：
+    // 1.执行resolve，Promise状态PromiseState：变成fulfilled
+    // 2.执行reject,Promise状态PromiseState:变成rejected
+    // 3.且Promise的状态不可逆，第一次成功就永久为fulfilled,第一次失败就为reject
+    // 4.Promise中若有throw存在，就相当于执行了reject
+
+    // case1: 仿造一个Promise的两个状态 resolve,reject
+    // 1.初始化Promise状态为pending
+    // 2.对resolve,reject绑定this:确保resolve，reject的指向永远指向当前的myPromise,防止随着函数执行环境的改变而改变
+
+    class myPromise {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1.初始化值（参数）
+        this.initValue()
+        // 1.2.初始化this指向
+        this.initBind()
+        // 1.3.执行传进来的函数executor
+        executor(this.resolve, this.reject)
+      }
+
+      // 2.定义构造方法
+      // 2.1.初始化结果/状态
+      initValue () {
+        this.PromiseResult = null
+        this.PromiseState = 'pending'
+      }
+
+      // 2.2.初始化this(绑定this)
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // *2.3.如果执行resolve,PromiseState状态变为fulfilled
+      resolve (value) {
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value //最终值为传进来的值
+      }
+
+      // *2.4.如果执行reject,PromiseState状态变为rejected
+      reject (reason) {
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason //最终值为传进来的值
+      }
+    }
+
+    // test1：对resolve，reject功能测试
+    const test1 = new myPromise((resolve, reject) => {
+      resolve('success')
+    })
+    const test2 = new myPromise((resolve, reject) => {
+      reject('fail')
+    })
+    console.log('test1 resolved:', test1)
+    console.log('test2 reject:', test2)
+    // myPromise {PromiseResult: 'success', PromiseState: 'fulfilled', resolve: ƒ, reject: ƒ}
+    // myPromise {PromiseResult: 'fail', PromiseState: 'rejected', resolve: ƒ, reject: ƒ}
+
+    // 上面已经完成了特点一和二，但是如果resolve,reject一起存在，先执行谁状态就是谁，不可逆
+    const test3 = new myPromise((resolve, reject) => {
+      resolve('success')
+      reject('fail')
+    })
+    console.log('test3 resolved&&rejected:', test3);
+    // myPromise {PromiseResult: 'fail', PromiseState: 'rejected', resolve: ƒ, reject: ƒ}
+    // 通过test3得出：当前的myPromise，的PromiseState状态会随着函数的执行而改变
+
+    // 正常情况：Promise的状态是不可逆的,如下先执行reject，最终返回PromiseState为reject
+    let test4 = new Promise((resolve, reject) => {
+      reject('fail')
+      resolve('success')
+    })
+    console.log('test4 Promise reject&&resolve:', test4);
+    // [[Prototype]]: Promise
+    // [[PromiseState]]: "rejected"
+    // [[PromiseResult]]: "fail"
+
+    // 通过test4得出：正常Promise的状态是不可逆的，先执行谁就返回谁的PromiseState状态，和PromiseResult结果
+
+    // 那么如何完善当前myPromise的这个问题呢？
+    // 正常情况下Promise的状态有三种，初始状态为pending；
+    // 在执行resolve或reject后PromiseState状态会随之变化
+    // 也就是说如果PromiseState状态不等于pending那么就说明resolve或reject其中有一个已经执行
+    // 所以需要在resolve或reject方法加上，PromiseState状态不等于pending 的条件
+
+
+    // resolve() {
+    //     if (this.PromiseState !== 'pending') return
+    // }
+    // reject() {
+    //     if (this.PromiseState !== 'pending') return
+    // }
+
+    // 完善后的第二版：myPromise2
+    class myPromise2 {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1.初始化值（参数）
+        this.initValue()
+        // 1.2.初始化this指向
+        this.initBind()
+        // 1.3.执行传进来的函数executor
+        executor(this.resolve, this.reject)
+      }
+
+      // 2.定义构造方法
+      // 2.1.初始化结果/状态
+      initValue () {
+        this.PromiseResult = null
+        this.PromiseState = 'pending'
+      }
+
+      // 2.2.初始化this(绑定this)
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // *2.3.如果执行resolve,PromiseState状态变为fulfilled
+      resolve (value) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value //最终值为传进来的值
+      }
+
+      // *2.4.如果执行reject,PromiseState状态变为rejected
+      reject (reason) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason //最终值为传进来的值
+      }
+    }
+
+    // 测试PromiseState状态是否还可逆
+    const test5 = new myPromise2((resolve, reject) => {
+      // 只以第一次为准
+      resolve('success')
+      reject('fail')
+    })
+    console.log('test5 resolved&reject:', test5);
+
+    // 到这里一起完成了Peomise的前三个特点的功能：
+    // 1.执行resolve，Promise状态PromiseState：变成fulfilled
+    // 2.执行reject,Promise状态PromiseState:变成rejected
+    // 3.且Promise的状态不可逆，第一次成功就永久为fulfilled,第一次失败就为reject
+    // 4.Promise中若有throw存在，就相当于执行了reject
+
+
+    // 当myPromise2中使用到throw方法时，需要让它执行reject。这里通关try..catch捕获错误信息
+    class myPromise3 {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1.初始化值（参数）
+        this.initValue()
+        // 1.2.初始化this指向
+        this.initBind()
+        // 1.4.版本三添加内容，用于捕获throw调用时执行reject
+        try {
+          // 1.3.执行传进来的函数executor
+          executor(this.resolve, this.reject)
+        } catch (error) {
+          this.reject(error) //error：throw传进来的值
+        }
+      }
+
+      // 2.定义构造方法
+      // 2.1.初始化结果/状态
+      initValue () {
+        this.PromiseResult = null
+        this.PromiseState = 'pending'
+      }
+
+      // 2.2.初始化this(绑定this)
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // *2.3.如果执行resolve,PromiseState状态变为fulfilled
+      resolve (value) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value //最终值为传进来的值
+      }
+
+      // *2.4.如果执行reject,PromiseState状态变为rejected
+      reject (reason) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason //最终值为传进来的值
+      }
+    }
+    // throw功能测试：
+    const test6 = new myPromise3((resolve, reject) => {
+      throw ('fail')
+    })
+    console.log('test6 myPromise3&throw:', test6)
+    // myPromise3 {PromiseResult: 'fail', PromiseState: 'rejected', resolve: ƒ, reject: ƒ}
+
+    // 上述以初步实现了Promise的resolve,reject的基本功能
+
+
+    // case2: then
+    // Promise本身是同步执行的，但是其内部方法是异步操作
+    // 正常情况: then的业务
+
+    // 1.马上返回resolve结果success
+    const p3 = new Promise((resolve, reject) => {
+      resolve('success')
+    })
+    p3.then(
+      res => {
+        console.log('p3 then:res', res);
+      },
+      err => {
+        console.log('p3 then:err', err);
+      }
+    )
+
+    // 2.延迟1s返回错误fail
+    const p4 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject('fail')
+      }, 1000)
+    })
+    p4.then(
+      res => {
+        console.log('p4 then:res', res);
+      },
+      err => {
+        console.log('p4 then:err', err);
+      }
+    )
+
+    // 3.多次使用then,输出最终结果（链式调用）
+    const p5 = new Promise((resolve, reject) => {
+      resolve(100)
+    })
+    p5.then(
+      res => res * 2, //resolve返回结果的两倍
+      err => console.log('p5 then:err', err)
+    )
+      .then(
+        res => {
+          console.log('p5-then2 then:res', res) //output:200
+        },
+        err => {
+          console.log('p5-then2 then:err', err);
+        }
+      )
+
+    // 通过上述p3,p4,p5测试得出：
+    // 1.then接收两个参数（一个是成功的回调，一个是失败的回调）
+    // 当Promise状态为fulfilled执行成功回调，为rejected执行失败回调
+    // 2.当resolve或reject在定时器中，侧定时器结束后再执行then
+    // 3.then支持链式调用，并且下一次then执行受上一次影响
+
+    // 实现Promise的then功能：
+    class myPromise4 {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1.初始化值（参数）
+        this.initValue()
+        // 1.2.初始化this指向
+        this.initBind()
+        // 1.4.版本三添加内容，用于捕获throw调用时执行reject
+        try {
+          // 1.3.执行传进来的函数executor
+          executor(this.resolve, this.reject)
+        } catch (error) {
+          this.reject(error) //error：throw传进来的值
+        }
+      }
+
+      // 2.定义构造方法
+      // 2.1.初始化结果/状态
+      initValue () {
+        this.PromiseResult = null
+        this.PromiseState = 'pending'
+      }
+
+      // 2.2.初始化this(绑定this)
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // *2.3.如果执行resolve,PromiseState状态变为fulfilled
+      resolve (value) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value //最终值为传进来的值
+      }
+
+      // *2.4.如果执行reject,PromiseState状态变为rejected
+      reject (reason) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason //最终值为传进来的值
+      }
+
+
+      // * 3. then方法
+      then (onFulfilled, onRejected) {
+        // 1.检验传入参数
+        // 对接收的成功回调回调，进行校验 ? 是就返回该回调函数 ： 否则将非函数的值赋值返回
+        onFulfilled = typeof onFulfilled === "function" ? onFulfilled : val => val
+
+        // 对接收的失败回调，进行校验 ? 是就返回该回调函数 ： 否则通过throw抛出reason
+        onRejected = typeof onRejected === "function" ? onRejected : reason => {
+          throw reason
+        }
+
+        // 2.判断传入回调
+        if (this.PromiseState === 'fulfilled') {
+          onFulfilled(this.PromiseResult)
+        } else if (this.PromiseState === 'rejected') {
+          onRejected(this.PromiseResult)
+        }
+      }
+    }
+    // 测试：
+    // 1.then调用马上返回
+    const p6 = new myPromise4((resolve, reject) => {
+      resolve('success')
+    })
+    p6.then(
+      res => console.log('myPromise4 then:res', res),
+      err => console.log('myPromise4 then:err', err)
+    )
+
+
+    // 实现Promise的then功能：延迟调用
+    // 核心：我们不能确保1秒后才执行then函数，但是我们可以保证1秒后再执行then里的回调
+    class myPromise5 {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1.初始化值（参数）
+        this.initValue()
+        // 1.2.初始化this指向
+        this.initBind()
+        // 1.4.版本三添加内容，用于捕获throw调用时执行reject
+        try {
+          // 1.3.执行传进来的函数executor
+          executor(this.resolve, this.reject)
+        } catch (error) {
+          this.reject(error) //error：throw传进来的值
+        }
+      }
+
+      // 2.定义构造方法
+      // 2.1.初始化结果/状态
+      initValue () {
+        this.PromiseResult = null
+        this.PromiseState = 'pending'
+        this.onFulfilledCallbacks = [] // 版本5添加内容:用于存调用then时的回调函数
+        this.onRejectedCallbacks = [] // 版本5添加内容
+      }
+
+      // 2.2.初始化this(绑定this)
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // *2.3.如果执行resolve,PromiseState状态变为fulfilled
+      resolve (value) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value //最终值为传进来的值
+        // 3.2.1.版本5添加内容: 延迟过后执行保存的成功回调
+        while (this.onFulfilledCallbacks.length) {
+          this.onFulfilledCallbacks.shift()(this.PromiseResult)
+          // 因为一个promise实例可能会多次then，用数组就一个一个保存/便于下一个then调用
+        }
+      }
+
+      // *2.4.如果执行reject,PromiseState状态变为rejected
+      reject (reason) {
+        if (this.PromiseState !== 'pending') return //版本二添加的内容
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason //最终值为传进来的值
+        // 3.2.1.版本5添加内容: 延迟过后执行保存的失败回调
+        while (this.onRejectedCallbacks.length) {
+          this.onRejectedCallbacks.shift()(this.PromiseResult)
+          // 因为一个promise实例可能会多次then，用数组就一个一个保存/便于下一个then调用
+        }
+      }
+
+
+
+      // * 3. then方法版本四添加内容
+      then (onFulfilled, onRejected) {
+        // 1.检验传入参数
+        // 对接收的成功回调回调，进行校验 ? 是就返回该回调函数 ： 否则将非函数的值赋值返回
+        onFulfilled = typeof onFulfilled === "function" ? onFulfilled : val => val
+
+        // 对接收的失败回调，进行校验 ? 是就返回该回调函数 ： 否则通过throw抛出reason
+        onRejected = typeof onRejected === "function" ? onRejected : reason => {
+          throw reason
+        }
+
+        // 2.判断传入回调
+        //  版本5添加内容：那么问题来了，我们怎么知道当前2秒还没走完甚至还没开始走呢？
+        // 其实很好判断，只要状态是pending，那就证明定时器还没跑完，因为如果定时器跑完的话，那状态肯定就不是pending，而是fulfilled或者rejected
+        if (this.PromiseState === 'fulfilled') {
+          onFulfilled(this.PromiseResult)
+        } else if (this.PromiseState === 'rejected') {
+          onRejected(this.PromiseResult)
+        } else if (this.PromiseState === 'pending') {
+          // 版本5添加内容: （存在延迟时,将this指向onFulfilled，onRejected）如果状态为待定状态，暂时保存两个回调
+          // 便于延迟过后resolve，或reject执行then延迟前存在 onFulfilledCallbacks 中的onFulfilled或onRejected
+          this.onFulfilledCallbacks.push(onFulfilled.bind(this))
+          this.onRejectedCallbacks.push(onRejected.bind(this))
+        }
+      }
+    }
+    // 测试
+    // 2.延迟2s返回 success
+    const p7 = new myPromise5((resolve, reject) => {
+      setTimeout(() => {
+        resolve('success')
+      }, 2000)
+    })
+    p7.then(
+      res => {
+        console.log('p7 myPromise5 then:res', res);
+      },
+      err => {
+        console.log('p7 myPromise5 then:err', err);
+      }
+    )
+
+    // 以上已经基本完成Promise，then方法的单次调用
+    // 那么接下来怎么实现（链式调用）多次调用then呢？
+    const p8 = new Promise((resolve, reject) => {
+      resolve(100)
+    })
+    p8.then(
+      res => 2 * res,
+      err => console.log('Promise err', err))
+      .then(
+        res => console.log('Promise res', res),
+        err => console.log('Promise err', err)
+      )
+
+    const p9 = new Promise((resolve, reject) => {
+      resolve(100)
+    })
+    p9.then(
+      res => new Promise((resolve, reject) => resolve(3 * res)),
+      err => console.log('Promise err', err)
+    )
+      .then(
+        res => console.log('Promise res', res),
+        err => console.log('Promise err', err)
+      )
+
+    // 通过p8,p9测试得出:
+    // then支持链式调用，下一次then执行受上一次then返回值的影响
+    // 1. then方法本身会返回一个新的Promise对象；
+    // 2. 如果返回值是promise对象，返回值为成功，新promise就是成功；
+    // 3. 如果返回值是promise对象，返回值为失败，新promise就是失败；
+    // 4. 如果返回值非promise对象，新promise对象就是成功，值为此返回值；
+
+    // 问:then是Promise上的方法， 那如何实现then完还能再then呢？
+    // 因为then是Promise上的方法,所以只要 then执行后返回一个Promise对象，就能保证then完还能继续执行then
+    class myPromise6 {
+      // 1.构造方法
+      constructor(executor) {
+        // 1.1初始化参数
+        this.initValue()
+        // 1.2初始化this
+        this.initBind()
+        // 1.3执行回调方法
+        try {
+          // 执行回调
+          executor(this.resolve, this.reject) //?怎么执行的
+        } catch (e) {
+          // throw执行捕捉到错误直接执行reject
+          this.reject(e)
+        }
+      }
+
+      // 2.定义初始化方法
+      initValue () {
+        this.PromiseState = 'pending'
+        this.PromiseResult = null
+        this.onFulfilledCallbacks = []
+        this.onRejectedCallbacks = []
+      }
+
+      initBind () {
+        this.resolve = this.resolve.bind(this)
+        this.reject = this.reject.bind(this)
+      }
+
+      // 3.定义回调方法
+      // 3.1成功回调
+      resolve (value) {
+        if (this.PromiseState !== 'pending') return
+        this.PromiseState = 'fulfilled'
+        this.PromiseResult = value
+        while (this.onFulfilledCallbacks.length) {
+          this.onFulfilledCallbacks.shift()(this.PromiseResult) //取出第一个回调并执行(一个一个保存)
+        }
+      }
+
+      // 3.2失败回调
+      reject (reason) {
+        if (this.PromiseState !== 'pending') return
+        this.PromiseState = 'rejected'
+        this.PromiseResult = reason
+        while (this.onRejectedCallbacks.length) {
+          this.onRejectedCallbacks.shift()(this.PromiseResult)
+        }
+      }
+
+      // 4.then功能实现
+      then (onFulfilled, onRejected) {
+        // 4.1then接收两个回调,对其进行校验
+        onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : val => val
+        onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw (reason) }
+
+        // 4.3then返回的新的Promise对象,保证下一个then能访问到then
+        var thenPromise = new myPromise6((resolve, reject) => {
+
+          // 4.3.1定义一个新的then的Promise返回对象
+          const resolvePromise = callBack => {
+            // 4.3.1.1错误校验
+            try {
+              // 4.3.1.2定义,接收并执行上一个then传进来的Promise回调
+              const x = callBack(this.PromiseResult)
+
+              // 4.3.1.3判断回调是否是Promise
+              if (x instanceof myPromise6) {
+                // 如果是Promise对象,返回成功/失败,新的Promise就是成功/失败
+                // 并且只有then才知道Promise是成功还是失败
+                x.then(resolve, reject)
+              } else {
+                resolve(x)
+              }
+
+            } catch (err) {
+              reject(err)
+              throw new Error(err)
+            }
+          }
+
+          // 4.3.2判断执行的回调
+          if (this.PromiseState === 'fulfilled') {
+            resolvePromise(onFulfilled)// 如果当前为成功状态，执行第一个回调
+          } else if (this.PromiseState === 'rejected') {
+            resolvePromise(onRejected)// 如果当前为失败状态, 执行第二个回调
+          } else if (this.PromiseState === 'pending') {
+            // 如果当前为等待状态,需要保存当前的两个回调,(为了让延迟结束后,resolva,reject能执行保存的回调)
+            this.onFulfilledCallbacks.push(resolvePromise.bin(this, onFulfilled))
+            this.onRejectedCallbacks.push(resolvePromise.bind(this, onRejected))
+          }
+        })
+
+        // 4.4将包装的回调返回
+        return thenPromise
+
+      }
+
+    }
+    // testPromise6:
+    const testPromise6 = new myPromise6((resolve, reject) => {
+      // throw('testPromise6 fail')
+      // resolve('success')
+      // reject('fail testPromise6')
+      setTimeout(() => {
+        resolve('testPromise6 success') // 1秒后输出 success
+      }, 5000)
+    }).then(res => console.log(res), err => console.log(err))
+    // console.log('testPromise6',testPromise6) 
+
+    const testPromise61 = new myPromise6((resolve, reject) => {
+      resolve(100)
+    }).then(
+      res => 4 * res,
+      err => 5 * err
+    )
+      .then(res => console.log('testPromise61 success', res), err => console.log('fail', err))
+
+
+    const testPromise62 = new myPromise6((resolve, reject) => {
+      resolve(200)
+    }).then(
+      res => new myPromise6((resolve, reject) => reject(2 * res)),
+      err => new myPromise6((resolve, reject) => resolve(3 * err))
+    )
+      .then(res => console.log('testPromise62 success', res), err => console.log('testPromise62 fail', err))
+  </script>
+</body>
+
+</html>
