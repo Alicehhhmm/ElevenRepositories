@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>new 实现原理</title>
+</head>
+
+<body>
+    <script>
+        // new: 创建一个新的实例
+
+        function Person(name, age) {
+            // 1.情况一：实例中有定义的属性---返回属性
+            // this.name = name;
+            // this.age = age;
+
+            // 情况二：实例中有返回值（非空对象）----返回非空对象
+            // return {
+            //     name: name,
+            //     hobby: 'basketballs',
+            // }
+            console.log(name);
+            // 情况三：实例中有非对象的值---
+            return '我是实例非对象值'
+        }
+        const person = new Person('小米', 12)
+        console.log('person', person);
+        console.log('person.name', person.name);
+        console.log('person.age', person.age);
+        console.log('person.hobby', person.hobby);
+
+
+        // case 1: myNew
+        function myNew() {
+            // 1.创建一个新的obj
+            var obj = new Object()
+
+            // 2.过滤参数
+            Constructor = [].shift.call(arguments)
+
+            // 3.定义新对象__proto__,让他访问到实现的属性
+            obj.__proto__ = Constructor.prototype
+
+            // 4.将构造函数的this,通过apply修改指向,让this下指向新的obj
+            var res = Constructor.apply(obj, arguments)
+
+            // 5.判断实例是否存在返回值，？ 存在返回值 ： 不存在返回实例对应的属性
+            return typeof res === 'object' ? res : obj
+
+        }
+
+        const person2 = myNew(Person, '大明', 18)
+
+
+        // case 2:myNew2
+        function myNew2() {
+            // 1.创建一个新的对象
+            var obj = new Object()
+            // 2.过滤arguments参数，将第一个参数删除
+            Constructor = [].shift.call(arguments)
+            // 3.通过将构造函数，赋值给新的对象
+            obj.__proto__ = Constructor.prototype
+            // 4.改变this指向，通过applyj将构造函数指向新对象obj
+            let res = Constructor.apply(obj, arguments)
+            // 5.判断构造的函数是否有非空对象 ？ 有返回非空对象 ： 没有侧返回其他属性，其他对属性为定义测返回undefind
+            return typeof res === 'object' ? res : obj
+        }
+
+        const person3 = myNew(Person, '张小凡', 20)
+        // new Person()
+        console.log('person3', person3);
+    </script>
+</body>
+
+</html>
