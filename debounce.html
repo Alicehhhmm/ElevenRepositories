@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debounce</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 50vh;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="btn" onclick="myFunction()"> onClick ++ </button>
+  <input type="text" value="" placeholder="3s后显示数据" />
+
+
+  <script>
+    function debounce (fn, delay) {
+      let timer = null
+
+      return function() {
+        let context = this
+        let args = arguments
+
+        // 清除之前存在的定时器
+        if (timer) {
+          clearTimeout(timer)
+          timer = null
+        }
+
+        // 事件执行间隔时间
+        timer = setTimeout(() => {
+          fn.apply(context, args)
+        }, delay);
+      }
+
+    }
+
+
+    // test 
+    // 3s后输出：output
+    let counter = 0
+    function fn () {
+      var name = document.querySelector("input");
+      name.value = counter;
+
+      console.log('output');
+    }
+
+    function myFunction (event) {
+      console.log(`触发第${++counter}次`)
+      const inputext = document.querySelector("body")
+      var span = document.createElement("span")
+      span.innerHTML = `${counter}`
+      inputext.appendChild(span)
+      debounce(fn, 3000)()
+    }
+
+  </script>
+</body>
+
+</html>
