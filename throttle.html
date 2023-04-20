@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Throttle</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 50vh;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="btn" onclick="myFunction()"> onClick ++ </button>
+  <input type="text" value="" placeholder="3s后显示数据" />
+
+  <script>
+
+    function throttle (fn, delay) {
+      let previousTime, deferTimer
+
+      return function() {
+        let context = this,
+          args = arguments,
+          currentTime = Date.now()
+
+        // 对比两次时间间隔，若超过指定时间，则执行函数
+        if (currentTime <= previousTime + delay) {
+
+          clearTimeout(deferTimer)
+
+          deferTimer = setTimeout(() => {
+            previousTime = currentTime
+            fn.apply(context, args)
+          }, delay)
+
+        } else {
+          previousTime = currentTime
+          fn.apply(context, args)
+        }
+      }
+    }
+
+
+    // test ：输出函数
+    let counter = 0
+    function fn (res, num, type) {
+      if (type === 'input') {
+        const inputext = document.querySelector("body")
+        var span = document.createElement("span")
+        span.innerHTML = `输入了${num}次,最终内容：${res}`
+        inputext.appendChild(span)
+      } else {
+        document.querySelector("input").value = `触发${counter}次`
+        console.log('output', res);
+      }
+    }
+
+    // test ：Delay
+    const inputEle = document.querySelector("input");
+    const outputRes = throttle(fn, 3000);
+
+    // test ：Input
+    inputEle.addEventListener("input", (eve) => {
+      outputRes(eve.target.value, ++counter, 'input');
+    });
+
+    // test ：Click
+    function myFunction () {
+      outputRes(counter);
+      const inputext = document.querySelector("body")
+      var span = document.createElement("span")
+      span.innerHTML = `${counter}`
+      inputext.appendChild(span)
+      console.log(`触发第${++counter}次`)
+    }
+  </script>
+</body>
+
+</html>
