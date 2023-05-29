@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hash 路由</title>
+</head>
+
+<body>
+  <div class="container">
+    <button onclick="window.location.hash = '#' ">Home</button>
+    <button onclick="window.location.hash = '#list' ">List</button>
+    <button onclick="window.location.hash = '#about' ">About</button>
+
+    <p id="context"></p>
+  </div>
+</body>
+<script>
+  /**
+   * 核心思路：改变hash值，同步更新对应内容
+  */
+  class HashRouter {
+    constructor() {
+      this.routes = {};
+      this.update = this.update.bind(this);
+      window.addEventListener('load', this.update);
+      window.addEventListener('hashchange', this.update);
+    }
+
+    // 更新对应路径下的内容
+    seed (path, callback) {
+      this.routes[path] = callback;
+    }
+
+    // hash值修改
+    update () {
+      const path = `/${window.location.hash.slice(1)}` || '';
+      this.routes[path]();
+    }
+  }
+
+  // test
+  const router = new HashRouter();
+  router.seed('/', () => changeText('首页内容'))
+  router.seed('/list', () => changeText('列表页内容'))
+  router.seed('/about', () => changeText('关于我们页面'))
+
+  function changeText (text) {
+    if (JSON.stringify(text) === '') return
+    document.getElementById('context').innerHTML = text;
+  }
+</script>
+
+</html>
