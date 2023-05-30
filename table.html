@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>原生table表格</title>
+  <style>
+    body {
+      background-color: ghostwhite;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    table {
+      width: 80%;
+      padding: 24px;
+      border: 0;
+      font-size: 14px;
+      border: 1px solid #ebebeb;
+      border-radius: 8px;
+      transition: .2s;
+      color: #606266;
+      background-color: #ffff;
+    }
+
+    table tbody {
+      display: block;
+      height: 400px;
+      overflow-y: scroll;
+    }
+
+
+    thead {
+      color: #909199;
+      font-weight: 500;
+    }
+
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding: 0 4px 4px 0;
+
+    }
+
+    tbody,
+    thead {
+      border-collapse: collapse;
+    }
+
+    table thead,
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    table thead {
+      width: calc(100% - 12px);
+    }
+
+    tr {
+      flex: 1;
+      word-wrap: break-word;
+      overflow: auto;
+    }
+
+    tr:nth-child(2n) td {
+      background-color: #f6f6f6;
+    }
+
+    tr th {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+      word-break: break-all;
+      line-height: 23px;
+      background-color: rgb(103, 130, 202);
+      color: #fff;
+      padding: 10px;
+      border: 1px solid #ebeef5;
+    }
+
+    tr td {
+      padding: 12px 10px;
+      min-width: 0;
+      box-sizing: border-box;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      overflow: hidden;
+      white-space: normal;
+      word-break: break-all;
+      line-height: 23px;
+      background-color: #ffffff;
+      border-right: 1px solid #ebeef5;
+      border-bottom: 1px solid #ebeef5;
+    }
+
+    tr td:first-child {
+      border-left: 1px solid #ebeef5;
+    }
+
+    table:hover {
+      box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    tr:hover {
+      background-color: #e9f7eac0;
+    }
+
+    tr td:active,
+    tr td:hover {
+      border: 1px solid rgb(161, 203, 243);
+      border-right: none;
+      border-left: none;
+    }
+
+
+    * {
+      scrollbar-color: #bfc1c4 #ebebeb;
+      scrollbar-width: thin;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background-color: #ebebeb;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-track {
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      width: 6px;
+      height: 6px;
+      background-color: #bfc1c4;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th>年龄</th>
+        <th>出生年月</th>
+        <th>手机号码</th>
+        <th>单位</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>张三</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>这里内容很多这里内容很多这里内容很多这里内容很多这里内容很多这里内容很多这里内容很多</td>
+      </tr>
+      <tr>
+        <td>李四</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>阿里巴巴与四十大盗</td>
+      </tr>
+      <tr>
+        <td>王五</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>腾讯科技</td>
+      </tr>
+      <tr>
+        <td>贾六</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>浏阳河就业</td>
+      </tr>
+      <tr>
+        <td>陈七</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>阿里巴巴</td>
+      </tr>
+      <tr>
+        <td>苏八</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>阿里巴巴</td>
+      </tr>
+      <tr>
+        <td>廖九</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>阿里巴巴</td>
+      </tr>
+      <tr>
+        <td>唐十</td>
+        <td>18</td>
+        <td>1978-9-1</td>
+        <td>10240297</td>
+        <td>阿里巴巴</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
+</html>
