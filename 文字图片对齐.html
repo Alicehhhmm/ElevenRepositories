@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>icon&&img 对齐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: whitesmoke;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            column-gap: 2rem;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        #box1,
+        #box2,
+        #box3,
+        #box4,
+        #box5,
+        #box6 {
+            color: #fff;
+            background-color: #234;
+        }
+
+
+        span,
+        p,
+        div {
+            background-color: orange;
+        }
+
+        #box2 {
+            display: flex;
+        }
+
+        #box3 {
+            display: flex;
+            align-items: baseline;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="" id="box1">
+        <img src="./Tx4.jpg">
+        <span>span文字</span>
+    </a>
+
+    <a href="" id="box2">
+        <img src="./Tx4.jpg">
+        <div>div文字</div>
+    </a>
+
+    <a href="" id="box3">
+        <img src="./Tx4.jpg">
+        <p>p文字</p>
+    </a>
+</body>
+
+</html>
