@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: 10px;
+      background-color: #333;
+    }
+
+    div {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #fff;
+      text-align: center;
+      line-height: 40px;
+      background-color: hsl(var(--dro), 100%, 46%);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="draggable" draggable="true" style="--i:0 ; --dro:100">1</div>
+  <div id="box" style="--i:1 ; --dro:140">2</div>
+  <div id="box" style="--i:2 ; --dro:180">3</div>
+  <div id="box" style="--i:3 ; --dro:220">4</div>
+  <div id="box" style="--i:4 ; --dro:260">5</div>
+  <div id="box" style="--i:5 ; --dro:300">6</div>
+  <div id="box" style="--i:6 ; --dro:340">7</div>
+
+  <script>
+    const arr = document.getElementById('dragstart')
+    const arrx = [2, 3, 6, 2, 1, 5, 4,]
+
+    // function
+    function quickSort (arr) {
+      if (arr.length <= 1) return arr
+      var brr = [],
+        crr = []
+
+      for (var i = 1; i < arr.length; i++) {
+        if (arr[i] < arr[0]) {
+          brr.push(arr[i])
+          console.log('第二个值 < 第一个：换位', arr[i])
+        } else {
+          crr.push(arr[i])
+          console.log('第二个值 >= 第一个：正常', arr[i])
+        }
+      }
+
+      brr = quickSort(brr)
+      crr = quickSort(crr)
+      brr.push(arr[0])
+
+      return brr.concat(crr)
+    }
+
+    console.log('output', quickSort(arrx));
+
+  </script>
+</body>
+
+</html>
