@@ -11,12 +11,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: aliceblue;
       min-height: 50vh;
     }
   </style>
 </head>
 
 <body>
+  <h3>节流方法：</h3>
   <button id="btn" onclick="myFunction()"> onClick ++ </button>
   <input type="text" value="" placeholder="3s后显示数据" />
 
@@ -58,7 +60,6 @@
         inputext.appendChild(span)
       } else {
         document.querySelector("input").value = `触发${counter}次`
-        console.log('output', res);
       }
     }
 
