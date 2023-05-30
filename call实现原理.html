@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Function call&apply</title>
+</head>
+
+<body>
+  <script>
+    // call : 方法使用一个指定的this值和单独给出的一个或多个参数值，来调用另一个函数
+    let food = {
+      name: 'apple',
+    }
+
+    function person () {
+      console.log('person eat food name:', this.name);
+    }
+    person.call(food);
+
+    // case1: create call -> mycall 
+    Function.prototype.mycall = function(context) {
+      // 1.获取调用call的函数，this
+      context.fn = this
+      // 2.执行修改this指向的函数
+      context.fn()
+      // 3.执行完后删除函数
+      delete context.fn
+    }
+
+    // case2: 完善传参过程
+    Function.prototype.mycall2 = function(context) {
+      // 1.获取调用call的函数，this
+      context.fn = this
+      // 1.1 完善传参过程
+      let arg = [...arguments].slice(1) // 去掉第一个参数，保留它往后的所有参数
+      // 2.【传参】并执行修改this指向的函数，
+      context.fn(...arg)
+      // 3.执行完后删除函数
+      delete context.fn
+    }
+
+    // case 3: 假设调用 call 时没传参或传null的问题
+    Function.prototype.mycall3 = function(context) {
+      var context = context || window
+      context.fn = this
+      let arg = [...arguments].slice(1)
+      let result = context.fn(...arg)
+
+      delete context.fn
+      return result
+    }
+
+    // case 4: 最终版本通过ES6写法优化
+    Function.prototype.mycall4 = function(context, ...arg) {
+      if (typeof context === 'undefined' || context === null) {
+        context = window
+      }
+      let fnSymbol = Symbol() // ES symbol:防止参数污染
+      context[fnSymbol] = this
+      let fn = context[fnSymbol](...arg)
+      delete context[fnSymbol]
+      return fn
+    }
+
+    // 测试用例：
+    let food2 = {
+      name: 'banana',
+    }
+    var name = 'windows Name'
+
+    function person2 (number, price) {
+      console.log('food2 name:', this.name);
+      console.log('food2 number:', number);
+      console.log('food2 price:', price);
+    }
+
+    // test 4:
+    // person2.mycall4(null)
+    person2.mycall4(food2, '10', 60)
+
+
+  </script>
+</body>
+
+</html>
